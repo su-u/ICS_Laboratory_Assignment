@@ -23,6 +23,13 @@ namespace ICS_Laboratory_Assignment
             }
             this.Satisfaction = this.Satisfaction.OrderByDescending(x => x.Item2).ToList();
         }
+
+        public IReadOnlyList<int> GetMaximumSatisfaction()
+        {
+             return Satisfaction.GroupBy(x => x)
+                .Where(z => z.Key.Item2 == this.Satisfaction.Max(y => y.Item2))
+                .Select(zz => zz.Key.Item2).ToList<int>();
+        }
     }
 
     class Laboratory
@@ -79,14 +86,13 @@ namespace ICS_Laboratory_Assignment
             foreach (var student in unassigned)
             {
                 var s = student.Satisfaction.GroupBy(x => x)
-                    .Where(x => x.Key.Item1 == student.Satisfaction.Max(y => y.Item2));
+                    .Where(z => z.Key.Item2 == student.Satisfaction.Max(y => y.Item2))
+                    .Select(zz => zz.Key.Item2).ToList<int>();
                 foreach (var i in s)
                 {
                     Console.WriteLine(i);
                 }
             }
-
-
         }
     }
 }
