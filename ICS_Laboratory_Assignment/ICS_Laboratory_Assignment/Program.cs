@@ -9,13 +9,14 @@ namespace ICS_Laboratory_Assignment
     {
         public int Number { get; private set; }
         public double Gpa { get; set; }
-        public readonly List<Tuple<int,int>> Satisfaction;
+        public readonly List<Tuple<int,int>> Satisfaction = new List<Tuple<int, int>>();
 
 
         public Student(int num, double gpa, List<int> satisfaction)
         {
             this.Number = num;
             this.Gpa = gpa;
+
             for (int i = 1; i < satisfaction.Count; i++)
             {
                 this.Satisfaction.Add(Tuple.Create(i, satisfaction[i - 1]));
@@ -77,7 +78,12 @@ namespace ICS_Laboratory_Assignment
 
             foreach (var student in unassigned)
             {
-                Console.WriteLine(student.Satisfaction.GroupBy(x => x).Where(x => x.Key.Item1 == student.Satisfaction.Max().Item2));
+                var s = student.Satisfaction.GroupBy(x => x)
+                    .Where(x => x.Key.Item2 == student.Satisfaction.Max().Item2);
+                foreach (var i in s)
+                {
+                    Console.WriteLine(i);
+                }
             }
 
 
