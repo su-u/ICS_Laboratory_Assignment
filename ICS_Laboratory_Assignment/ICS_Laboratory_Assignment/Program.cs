@@ -17,11 +17,11 @@ namespace ICS_Laboratory_Assignment
             this.Number = num;
             this.Gpa = gpa;
 
-            for (int i = 1; i < satisfaction.Count; i++)
+            for (int i = 1; i <= satisfaction.Count; i++)
             {
                 this.Satisfaction.Add(Tuple.Create(i, satisfaction[i - 1]));
             }
-            this.Satisfaction = this.Satisfaction.OrderBy(x => x.Item2).ToList();
+            this.Satisfaction = this.Satisfaction.OrderByDescending(x => x.Item2).ToList();
         }
     }
 
@@ -74,12 +74,12 @@ namespace ICS_Laboratory_Assignment
                 unassigned.Add(new Student(int.Parse(line?[0]), double.Parse(line[1]), line.Skip(2).Select(int.Parse).ToList()));
             }
 
-            unassigned = unassigned.OrderBy(x => x.Gpa).ToList();
+            unassigned = unassigned.OrderByDescending(x => x.Gpa).ToList();
 
             foreach (var student in unassigned)
             {
                 var s = student.Satisfaction.GroupBy(x => x)
-                    .Where(x => x.Key.Item2 == student.Satisfaction.Max().Item2);
+                    .Where(x => x.Key.Item1 == student.Satisfaction.Max(y => y.Item2));
                 foreach (var i in s)
                 {
                     Console.WriteLine(i);
