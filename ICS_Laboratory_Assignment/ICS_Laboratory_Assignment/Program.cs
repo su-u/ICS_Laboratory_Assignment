@@ -24,19 +24,13 @@ namespace ICS_Laboratory_Assignment
             this.Satisfactions = this.Satisfactions.OrderByDescending(x => x.Item2).ToList();
         }
 
-        public IReadOnlyList<int> GetMaximumSatisfaction()
-        {
-             return Satisfactions.GroupBy(x => x)
-                .Where(z => z.Key.Item2 == this.Satisfactions.Max(y => y.Item2))
-                .Select(zz => zz.Key.Item2).ToList<int>();
-        }
-
         public int this[int i] => this.Satisfactions.Single(x => x.Item1 == i).Item2;
 
     }
 
     class Laboratory
     {
+        private static int autoNumber { get; set; } = 1;
         public string Name { get; private set; }
         public int Number { get; private set; }
         private readonly int MAX;
@@ -44,10 +38,10 @@ namespace ICS_Laboratory_Assignment
 
         public int DT { get; set; } = 0;
 
-        public Laboratory(int num, string name, int max)
+        public Laboratory(string name, int max)
         {
+            this.Number = autoNumber++;
             this.Name = name;
-            this.Number = num;
             this.MAX = max;
             Students = new List<Student>();
             this.DT = 0;
@@ -86,16 +80,16 @@ namespace ICS_Laboratory_Assignment
 
             List<Laboratory> laboratories = new List<Laboratory>
             {
-                new Laboratory(1, "清水研", 14),
-                new Laboratory(2, "水津研", 14),
-                new Laboratory(3, "菅原研", 14),
-                new Laboratory(4, "中静研", 14),
-                new Laboratory(5, "枚田研", 14),
-                new Laboratory(6, "中林研", 14),
-                new Laboratory(7, "藤原研", 14),
-                new Laboratory(8, "木下研", 8),
-                new Laboratory(9, "糸井研", 8),
-                new Laboratory(10, "長研", 14),
+                new Laboratory("清水研", 14),
+                new Laboratory("水津研", 14),
+                new Laboratory("菅原研", 14),
+                new Laboratory("中静研", 14),
+                new Laboratory("枚田研", 14),
+                new Laboratory("中林研", 14),
+                new Laboratory("藤原研", 14),
+                new Laboratory("木下研", 8),
+                new Laboratory("糸井研", 8),
+                new Laboratory("長研", 14),
             };
 
             var n = int.Parse(Console.ReadLine());
@@ -104,7 +98,7 @@ namespace ICS_Laboratory_Assignment
             {
                 var line = Console.ReadLine()?.Split().ToList();
 
-                if(line?.Count != 12)throw new Exception("入力ミス");
+                if(line?.Count != 12)throw new Exception($"入力ミス:{i + 1}");
 
                 unassigned.Add(new Student(int.Parse(line?[0]), double.Parse(line[1]), line.Skip(2).Select(int.Parse).ToList()));
             }
@@ -113,6 +107,7 @@ namespace ICS_Laboratory_Assignment
 
             foreach (var laboratory in laboratories)
             {
+
                 laboratory.DT = unassigned.Sum(x => x[laboratory.Number]);
             }
 
@@ -127,11 +122,6 @@ namespace ICS_Laboratory_Assignment
             {
 
                 var s = student.Satisfactions.GroupBy(x => x.Item2, value => value.Item1).ToList();
-
-
-                //var s = student.Satisfactions.GroupBy(x => x);
-                
-                //Console.Write($"{student.Number}: ");
 
                 bool j = false;
                 foreach (var i in s)
