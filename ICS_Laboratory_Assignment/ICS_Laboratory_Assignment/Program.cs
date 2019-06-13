@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Text;
 
 namespace ICS_Laboratory_Assignment
 {
@@ -76,9 +78,9 @@ namespace ICS_Laboratory_Assignment
         {
             foreach (var student in this.Students)
             {
-                Writter.Write("Output.txt",$"{student.Number} ");
+                Writer.Write(@"Output.txt",$"{student.Number} ");
             }
-            Writter.Write("Output.txt", $"\n");
+            Writer.Write(@"Output.txt", $"\n");
         }
     }
 
@@ -88,37 +90,60 @@ namespace ICS_Laboratory_Assignment
         static void Main(string[] args)
         {
             List<Student> unassigned = new List<Student>();
+            List<Laboratory> laboratories = new List<Laboratory>();
 
-            List<Laboratory> laboratories = new List<Laboratory>
+            //研究室情報の読み取り
+            try
             {
-                new Laboratory("清水研", 14),
-                new Laboratory("水津研", 14),
-                new Laboratory("菅原研", 14),
-                new Laboratory("中静研", 14),
-                new Laboratory("枚田研", 14),
-                new Laboratory("中林研", 14),
-                new Laboratory("藤原研", 14),
-                new Laboratory("木下研", 8),
-                new Laboratory("糸井研", 8),
-                new Laboratory("長研", 14),
-            };
-
-            var n = int.Parse(Console.ReadLine());
-
-            if (n >= Laboratory.MaximumStudent) throw new System.ArgumentOutOfRangeException($"入力人数が研究室上限を超えています。");
-
-            for (int i = 0; i < n; i++)
+                using (StreamReader sr = new StreamReader("Laboratory.txt", System.Text.Encoding.UTF8))
+                {
+                    var line = "";
+                    while ((line = sr.ReadLine()) != null)
+                    {
+                        var l = line?.Split().ToArray();
+                        if(l.Length > 2) throw new FormatException("入力値のミス");
+                        laboratories.Add(new Laboratory(l[0], int.Parse(l[1])));
+                    }
+                }
+            }
+            catch (Exception ex)
             {
-                var line = Console.ReadLine()?.Split().ToList();
+                Console.WriteLine(ex.Message);
+            }
 
-                if(line?.Count != 12)throw new System.FormatException($"入力ミス:{i + 1}");
 
-                var gpa = double.Parse(line[1]);
-                if (gpa < 1 && gpa > 4) throw new System.FormatException($"GPAの入力値ミス:{i + 1}");
-                var satisfactionsList = line.Skip(2).Select(int.Parse).ToList();
-                foreach (var s in satisfactionsList) if(s < 1 && s > 10) throw new System.FormatException($"希望の入力値ミス:{i + 1}");
+            //学生情報の読み込み
+            try
+            {
+                using (StreamReader sr = new StreamReader("Students.txt", System.Text.Encoding.UTF8))
+                {
+                    //var n = int.Parse(Console.ReadLine());
+                    var n = int.Parse(sr.ReadLine());
 
-                unassigned.Add(new Student(int.Parse(line?[0]), gpa, satisfactionsList));
+                    if (n >= Laboratory.MaximumStudent)
+                        throw new System.ArgumentOutOfRangeException($"入力人数が研究室上限を超えています。");
+
+                    for (int i = 0; i < n; i++)
+                    {
+                        //var line = Console.ReadLine()?.Split().ToList();
+                        var line = sr.ReadLine()?.Split().ToList();
+
+                        if (line?.Count != 12) throw new System.FormatException($"入力ミス:{i + 1}");
+
+                        var gpa = double.Parse(line[1]);
+                        if (gpa < 1 && gpa > 4) throw new System.FormatException($"GPAの入力値ミス:{i + 1}");
+                        var satisfactionsList = line.Skip(2).Select(int.Parse).ToList();
+                        foreach (var s in satisfactionsList)
+                            if (s < 1 && s > 10)
+                                throw new System.FormatException($"希望の入力値ミス:{i + 1}");
+
+                        unassigned.Add(new Student(int.Parse(line?[0]), gpa, satisfactionsList));
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             unassigned = unassigned.OrderByDescending(x => x.Gpa).ToList();
@@ -177,19 +202,20 @@ namespace ICS_Laboratory_Assignment
 
             }
 
+            System.IO.File.Delete(@"Output.txt");
             Console.WriteLine($"学生配属先研究室");
-            Writter.Write("Output.txt", $"学生配属先研究室\n");
+            Writer.Write(@"Output.txt", $"学生配属先研究室\n");
             foreach (var laboratory in laboratories)
             {
                 Console.Write($"{laboratory.Name}: ");
-                Writter.Write("Output.txt",$"{laboratory.Name}: ");
+                Writer.Write(@"Output.txt",$"{laboratory.Name}: ");
                 //laboratory.PrintStudents();
                 laboratory.WriteStudents();
             }
         }
     }
 
-    class Writter
+    class Writer
     {
         public static void WriteLog(string filename, string text)
         {
