@@ -212,6 +212,8 @@ namespace ICS_Laboratory_Assignment
                 //laboratory.PrintStudents();
                 laboratory.WriteStudents();
             }
+
+            Console.ReadKey();
         }
     }
 
