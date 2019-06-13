@@ -30,7 +30,8 @@ namespace ICS_Laboratory_Assignment
 
     class Laboratory
     {
-        private static int autoNumber { get; set; } = 1;
+        private static int AutoNumber { get; set; } = 1;
+        public static int MaximumStudent { get; private set; } = 0;
         public string Name { get; private set; }
         public int Number { get; private set; }
         private readonly int MAX;
@@ -40,11 +41,12 @@ namespace ICS_Laboratory_Assignment
 
         public Laboratory(string name, int max)
         {
-            this.Number = autoNumber++;
+            this.Number = Laboratory.AutoNumber++;
             this.Name = name;
             this.MAX = max;
             Students = new List<Student>();
             this.DT = 0;
+            Laboratory.MaximumStudent += max;
         }
 
         public int Size => this.Students.Count;
@@ -68,6 +70,15 @@ namespace ICS_Laboratory_Assignment
                 Console.Write($"{student.Number} ");
             }
             Console.WriteLine();
+        }
+
+        public void WriteStudents()
+        {
+            foreach (var student in this.Students)
+            {
+                Writter.Write("Output.txt",$"{student.Number} ");
+            }
+            Writter.Write("Output.txt", $"\n");
         }
     }
 
@@ -94,20 +105,27 @@ namespace ICS_Laboratory_Assignment
 
             var n = int.Parse(Console.ReadLine());
 
+            if (n >= Laboratory.MaximumStudent) throw new System.ArgumentOutOfRangeException($"入力人数が研究室上限を超えています。");
+
             for (int i = 0; i < n; i++)
             {
                 var line = Console.ReadLine()?.Split().ToList();
 
-                if(line?.Count != 12)throw new Exception($"入力ミス:{i + 1}");
+                if(line?.Count != 12)throw new System.FormatException($"入力ミス:{i + 1}");
 
-                unassigned.Add(new Student(int.Parse(line?[0]), double.Parse(line[1]), line.Skip(2).Select(int.Parse).ToList()));
+                var gpa = double.Parse(line[1]);
+                if (gpa < 1 && gpa > 4) throw new System.FormatException($"GPAの入力値ミス:{i + 1}");
+                var satisfactionsList = line.Skip(2).Select(int.Parse).ToList();
+                foreach (var s in satisfactionsList) if(s < 1 && s > 10) throw new System.FormatException($"希望の入力値ミス:{i + 1}");
+
+                unassigned.Add(new Student(int.Parse(line?[0]), gpa, satisfactionsList));
             }
 
             unassigned = unassigned.OrderByDescending(x => x.Gpa).ToList();
 
+            //研究室ごとの合計希望値の計算
             foreach (var laboratory in laboratories)
             {
-
                 laboratory.DT = unassigned.Sum(x => x[laboratory.Number]);
             }
 
@@ -118,18 +136,23 @@ namespace ICS_Laboratory_Assignment
             }
             Console.WriteLine();
 
+            //各学生の研究室への割り当て
             foreach (var student in unassigned)
             {
 
+                //学生の希望度順
                 var s = student.Satisfactions.GroupBy(x => x.Item2, value => value.Item1).ToList();
 
                 bool j = false;
+                //最大規模値の研究室から処理
                 foreach (var i in s)
                 {
                     var k = i.ToList();
                     var labo = laboratories.Where(x => k.Contains(x.Number)).OrderBy(y => y.DT).ToList();
+                    //希望研究室の他学生の最小希望から処理
                     foreach (var l in labo)
                     {
+                        //研究室が満員だった場合は次へと回す
                         if (!l.IsMax())
                         {
                             l.AddStudent(student);
@@ -154,12 +177,38 @@ namespace ICS_Laboratory_Assignment
 
             }
 
-            //Console.WriteLine($"学生配属先研究室");
-            //foreach (var laboratory in laboratories)
-            //{
-            //    Console.Write($"{laboratory.Name}: ");
-            //    laboratory.PrintStudents();
-            //}
+            Console.WriteLine($"学生配属先研究室");
+            Writter.Write("Output.txt", $"学生配属先研究室\n");
+            foreach (var laboratory in laboratories)
+            {
+                Console.Write($"{laboratory.Name}: ");
+                Writter.Write("Output.txt",$"{laboratory.Name}: ");
+                //laboratory.PrintStudents();
+                laboratory.WriteStudents();
+            }
+        }
+    }
+
+    class Writter
+    {
+        public static void WriteLog(string filename, string text)
+        {
+            Write(filename, $"{DateTime.Now:yyyy/MM/dd HH:mm:ss:fff}, {text}");
+        }
+        public static void Write(string filename, string text)
+        {
+            try
+            {
+                var append = true;
+                using (var sw = new System.IO.StreamWriter(filename, append, System.Text.Encoding.UTF8))
+                {
+                    sw.Write($"{text}");
+                }
+            }
+            catch (System.Exception e)
+            {
+                System.Console.WriteLine(e.Message);
+            }
         }
     }
 }
