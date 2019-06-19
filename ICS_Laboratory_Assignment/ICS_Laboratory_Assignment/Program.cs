@@ -11,7 +11,7 @@ namespace ICS_Laboratory_Assignment
     {
         public int Number { get; private set; }
         public double Gpa { get; set; }
-        public readonly List<Tuple<int,int>> Satisfactions = new List<Tuple<int, int>>();
+        public readonly List<Tuple<int,int>> Satisfactions = new List<Tuple<int, int>>(12);
 
 
         public Student(int num, double gpa, List<int> satisfaction)
@@ -46,7 +46,7 @@ namespace ICS_Laboratory_Assignment
             this.Number = Laboratory.AutoNumber++;
             this.Name = name;
             this.MAX = max;
-            Students = new List<Student>();
+            Students = new List<Student>(max + 5);
             this.DT = 0;
             Laboratory.MaximumStudent += max;
         }
